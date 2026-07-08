@@ -82,7 +82,11 @@
     cpu: '<svg viewBox="0 0 24 24" ' + S + '><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>',
     bot: '<svg viewBox="0 0 24 24" ' + S + '><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg>',
     help: '<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-    more: '<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/><circle cx="5" cy="12" r="1.6"/></svg>'
+    more: '<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/><circle cx="5" cy="12" r="1.6"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" ' + S + '><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" ' + S + '><circle cx="12" cy="12" r="10"/><polyline points="12 7 12 12 15 14"/></svg>',
+    send: '<svg viewBox="0 0 24 24" ' + S + '><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24" ' + S + '><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>'
   };
 
   /* ======================================================================
@@ -153,7 +157,7 @@
      4) ESTADO + UTILITÁRIOS
      ====================================================================== */
   const app = document.getElementById('app');
-  const state = { screen: 'welcome', idx: 0, a: {}, protocol: '' };
+  const state = { screen: 'welcome', idx: 0, a: {}, protocol: '', historyEmail: '' };
 
   function activeSteps() { return buildSteps(state.a); }
   function isEmpty(v) { return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0); }
@@ -253,9 +257,9 @@
   function renderWelcome() {
     app.innerHTML =
       '<section class="hero anim-zoom">' +
-      '<div class="hero-badge">Portal de Chamados</div>' +
-      '<h1>Como a <span class="g">Loomy</span> pode ajudar?</h1>' +
-      '<p class="hero-sub">Abra um chamado para Suporte de T.I., Acessos &amp; Contas, Equipamentos, Automação de Processos ou IA Aplicada.</p>' +
+      '<div class="hero-badge">Suporte · Apontamentos · Melhorias</div>' +
+      '<h1>Portal de Chamados de T.I. na <span class="g">Loomy</span></h1>' +
+      '<p class="hero-sub">Abra um chamado de Suporte de T.I., Acessos &amp; Contas, Equipamentos, Automação de Processos ou IA Aplicada.</p>' +
       '<ul class="rules">' +
       '<li>Nenhuma tratativa é feita até o chamado ser aberto.</li>' +
       '<li>Fora da regional SP, o SLA pode ser estendido (acesso remoto).</li>' +
@@ -338,9 +342,62 @@
     document.getElementById('again').onclick = resetAll;
   }
 
+  function renderHistory() {
+    // Etapa 1: pedir o e-mail
+    if (!state.historyEmail) {
+      app.innerHTML =
+        '<section class="card anim-up">' +
+        '<h2 class="card-title">Meus chamados</h2>' +
+        '<p class="card-sub">Consulte o histórico de chamados que você abriu e as respostas recebidas da equipe de T.I., usando o e-mail informado na abertura.</p>' +
+        '<form id="histform" novalidate>' +
+        '<div class="field"><label for="hf">Seu e-mail</label>' +
+        '<input id="hf" type="email" autocomplete="email" placeholder="nome@loomy.com.br" value="' + esc(state.historyEmail || '') + '" />' +
+        '<p class="err" id="err"></p></div>' +
+        '<div class="nav">' +
+        '<button type="button" class="btn btn-ghost" id="back">Voltar</button>' +
+        '<button type="submit" class="btn btn-primary">Buscar histórico ' + ICONS.arrow + '</button>' +
+        '</div></form></section>';
+      const inp = document.getElementById('hf');
+      document.getElementById('back').onclick = resetAll;
+      inp.addEventListener('input', function () { const e = document.getElementById('err'); if (e) e.textContent = ''; });
+      document.getElementById('histform').onsubmit = function (e) {
+        e.preventDefault();
+        const v = inp.value.trim();
+        if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+          document.getElementById('err').textContent = 'Informe um e-mail válido.';
+          return;
+        }
+        state.historyEmail = v; render();
+      };
+      setTimeout(function () { inp.focus(); }, 40);
+      return;
+    }
+    // Etapa 2: resultado — a consulta real ao Monday depende da integração (ver README)
+    app.innerHTML =
+      '<section class="card anim-up">' +
+      '<h2 class="card-title">Meus chamados</h2>' +
+      '<p class="card-sub">Histórico de <span class="hist-email">' + esc(state.historyEmail) + '</span></p>' +
+      '<div class="notice"><span class="notice-ic">' + ICONS.clock + '</span>' +
+      '<span>A consulta em tempo real ao Monday será ativada junto com a integração de envio. ' +
+      'Assim que o back-end estiver conectado, esta tela listará automaticamente, para o e-mail informado:</span></div>' +
+      '<div class="hist-cols">' +
+      '<div class="hist-col"><h3><span class="hcol-ic">' + ICONS.send + '</span> Enviados</h3>' +
+      '<p>Chamados que você abriu, com o status atual (Em análise, Em progresso, Feito, Parado).</p></div>' +
+      '<div class="hist-col"><h3><span class="hcol-ic">' + ICONS.inbox + '</span> Respondidos</h3>' +
+      '<p>Atualizações e respostas da equipe de T.I. registradas em cada chamado.</p></div>' +
+      '</div>' +
+      '<div class="nav">' +
+      '<button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
+      '<button type="button" class="btn btn-light" id="new">Abrir novo chamado ' + ICONS.arrow + '</button>' +
+      '</div></section>';
+    document.getElementById('back').onclick = function () { state.historyEmail = ''; render(); };
+    document.getElementById('new').onclick = resetAll;
+  }
+
   function render() {
     const y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
     if (state.screen === 'welcome') return renderWelcome();
+    if (state.screen === 'history') return renderHistory();
     if (state.screen === 'success') return renderSuccess();
     if (state.screen === 'review') return renderReview();
     return renderForm();
@@ -435,7 +492,7 @@
   }
 
   function resetAll() {
-    state.screen = 'welcome'; state.idx = 0; state.a = {}; state.protocol = ''; render();
+    state.screen = 'welcome'; state.idx = 0; state.a = {}; state.protocol = ''; state.historyEmail = ''; render();
   }
 
   /* ======================================================================
@@ -443,5 +500,7 @@
      ====================================================================== */
   const logo = document.getElementById('logo');
   if (logo) logo.onclick = resetAll;
+  const histBtn = document.getElementById('history-btn');
+  if (histBtn) histBtn.onclick = function () { state.screen = 'history'; state.historyEmail = ''; render(); };
   render();
 })();

@@ -89,6 +89,19 @@ body {
   color: var(--muted-2);
   text-transform: uppercase;
 }
+.header-btn {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  background: rgba(166, 254, 31, 0.08);
+  border: 1px solid rgba(166, 254, 31, 0.28);
+  border-radius: 999px;
+  padding: 0.55rem 1.15rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.header-btn:hover { background: rgba(166, 254, 31, 0.16); transform: translateY(-1px); }
 
 .site-footer {
   position: relative;
@@ -440,6 +453,38 @@ select option { background: var(--card-solid); color: var(--text); }
   max-width: 28rem;
   line-height: 1.4;
 }
+
+/* -------------------- Histórico / avisos -------------------- */
+.card-title { font-size: 1.6rem; font-weight: 800; margin: 0 0 0.4rem; }
+.card-sub { color: var(--muted); margin: 0 0 1.75rem; line-height: 1.5; }
+.notice {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  padding: 1.1rem 1.25rem;
+  background: rgba(166, 254, 31, 0.06);
+  border: 1px solid rgba(166, 254, 31, 0.25);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.notice .notice-ic { flex: none; width: 22px; height: 22px; color: var(--green); margin-top: 0.1rem; }
+.notice .notice-ic svg { width: 100%; height: 100%; display: block; }
+.notice strong { color: var(--text); }
+.hist-cols { display: grid; gap: 0.85rem; margin-top: 1.25rem; }
+@media (min-width: 640px) { .hist-cols { grid-template-columns: 1fr 1fr; } }
+.hist-col {
+  padding: 1.1rem 1.25rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.hist-col h3 { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.35rem; font-size: 1rem; font-weight: 700; color: var(--text); }
+.hcol-ic { display: inline-flex; flex: none; width: 16px; height: 16px; color: var(--green); }
+.hcol-ic svg { width: 100%; height: 100%; display: block; }
+.hist-col p { margin: 0; font-size: 0.88rem; color: var(--muted); line-height: 1.45; }
+.hist-email { color: var(--green); font-weight: 600; word-break: break-word; }
 
 /* -------------------- Animações -------------------- */
 @keyframes up { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: none; } }
