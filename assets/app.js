@@ -7,6 +7,12 @@
   'use strict';
 
   /* ======================================================================
+     0) BACK-END — funções serverless na Vercel (/api/*)
+     Mesmo domínio quando servido pela Vercel; URL absoluta no Pages/local.
+     ====================================================================== */
+  const API_BASE = /(^|\.)vercel\.app$/.test(location.hostname) ? '' : 'https://chamados-ti-loomy.vercel.app';
+
+  /* ======================================================================
      1) FUNDO INTERATIVO — malha de pontos com "erupção" no cursor
      ====================================================================== */
   (function initMesh() {
@@ -101,6 +107,14 @@
     { id: 'outro',        label: 'Outro...',              desc: 'Não se encaixa nas opções',          icon: 'more' }
   ];
 
+  // Agrupamento visual (Suporte · Apontamentos · Melhorias). A lógica condicional
+  // por categoria continua idêntica à do WorkColumns/WorkForms do Monday.
+  const CAT_GROUPS = [
+    { label: 'Suporte', ids: ['acessos', 'equipamentos'] },
+    { label: 'Apontamentos', ids: ['ia', 'duvidas', 'outro'] },
+    { label: 'Melhorias', ids: ['automacao'] },
+  ];
+
   // Perguntas condicionais por categoria (mesma lógica do WorkForms)
   function stepsFor(cat) {
     switch (cat) {
@@ -157,7 +171,10 @@
      4) ESTADO + UTILITÁRIOS
      ====================================================================== */
   const app = document.getElementById('app');
-  const state = { screen: 'welcome', idx: 0, a: {}, protocol: '', historyEmail: '' };
+  const state = {
+    screen: 'welcome', idx: 0, a: {}, protocol: '', itemId: null,
+    historyEmail: '', historyLoading: false, historyError: '', historyData: null,
+  };
 
   function activeSteps() { return buildSteps(state.a); }
   function isEmpty(v) { return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0); }
@@ -209,30 +226,39 @@
       const t = step.type === 'email' ? 'email' : (step.type === 'tel' ? 'tel' : 'text');
       return '<div class="field anim-up"><label for="f">' + esc(step.label) + req + '</label>' +
         '<input id="f" type="' + t + '" autocomplete="off" placeholder="' + esc(step.placeholder || '') + '" value="' + esc(val || '') + '" />' +
-        hint + '<p class="err" id="err"></p></div>';
+        hint + '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     if (step.type === 'textarea') {
       return '<div class="field anim-up"><label for="f">' + esc(step.label) + req + '</label>' +
         '<textarea id="f" rows="5" placeholder="Escreva aqui...">' + esc(val || '') + '</textarea>' +
-        hint + '<p class="err" id="err"></p></div>';
+        hint + '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     if (step.type === 'category') {
+      const card = function (c) {
+        const sel = state.a.categoria === c.id ? ' sel' : '';
+        return '<button type="button" class="cat' + sel + '" data-cat="' + c.id + '">' +
+          '<span class="cat-ic">' + ICONS[c.icon] + '</span>' +
+          '<span class="cat-label">' + esc(c.label) + '</span>' +
+          '<span class="cat-desc">' + esc(c.desc) + '</span></button>';
+      };
+      const grid = CAT_GROUPS.map(function (g) {
+        const cards = g.ids.map(function (id) {
+          const c = CATEGORIES.find(function (x) { return x.id === id; });
+          return c ? card(c) : '';
+        }).join('');
+        return '<span class="cat-group-label">' + esc(g.label) + '</span>' + cards;
+      }).join('');
       return '<div class="field"><span class="q">' + esc(step.label) + req + '</span>' +
         '<p class="q-sub">Selecione a opção que melhor descreve a sua solicitação.</p>' +
-        '<div class="cat-grid">' + CATEGORIES.map(function (c) {
-          const sel = state.a.categoria === c.id ? ' sel' : '';
-          return '<button type="button" class="cat' + sel + '" data-cat="' + c.id + '">' +
-            '<span class="cat-ic">' + ICONS[c.icon] + '</span>' +
-            '<span class="cat-label">' + esc(c.label) + '</span>' +
-            '<span class="cat-desc">' + esc(c.desc) + '</span></button>';
-        }).join('') + '</div><p class="err" id="err"></p></div>';
+        '<div class="cat-grid">' + grid + '</div>' +
+        '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     if (step.type === 'select') {
       return '<div class="field"><span class="q">' + esc(step.label) + req + '</span>' +
         '<div class="chips">' + step.options.map(function (o) {
           const sel = state.a[step.key] === o ? ' sel' : '';
           return '<button type="button" class="chip' + sel + '" data-val="' + esc(o) + '">' + esc(o) + '</button>';
-        }).join('') + '</div>' + hint + '<p class="err" id="err"></p></div>';
+        }).join('') + '</div>' + hint + '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     if (step.type === 'multiselect') {
       const cur = Array.isArray(val) ? val : [];
@@ -240,7 +266,7 @@
         '<div class="chips">' + step.options.map(function (o) {
           const sel = cur.indexOf(o) >= 0 ? ' sel' : '';
           return '<button type="button" class="chip' + sel + '" data-val="' + esc(o) + '">' + esc(o) + '</button>';
-        }).join('') + '</div>' + hint + '<p class="err" id="err"></p></div>';
+        }).join('') + '</div>' + hint + '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     if (step.type === 'file') {
       return '<div class="field anim-up"><span class="q">' + esc(step.label) + req + '</span>' +
@@ -249,7 +275,7 @@
         '<span class="drop-sub">ou arraste os arquivos aqui</span></label>' +
         '<input id="f" type="file" multiple hidden />' +
         '<ul class="files" id="files">' + filesListHTML(step.key) + '</ul>' +
-        hint + '<p class="err" id="err"></p></div>';
+        hint + '<p class="err" id="err" aria-live="polite"></p></div>';
     }
     return '';
   }
@@ -313,6 +339,7 @@
       '<h2 class="review-title">Revise o seu chamado</h2>' +
       '<p class="review-sub">Confira as informações antes de enviar.</p>' +
       '<div class="review">' + summaryRows() + '</div>' +
+      '<p class="err" id="serr" aria-live="polite"></p>' +
       '<div class="nav">' +
       '<button type="button" class="btn btn-ghost" id="back">Voltar</button>' +
       '<button type="button" class="btn btn-primary" id="submit">Enviar solicitação ' + ICONS.arrow + '</button>' +
@@ -321,25 +348,104 @@
     document.getElementById('back').onclick = function () {
       state.screen = 'form'; state.idx = activeSteps().length - 1; render();
     };
-    document.getElementById('submit').onclick = function () {
-      const btn = this;
-      btn.disabled = true; btn.textContent = 'Enviando...';
-      // Envio simulado (front-end). Ver README para integração real com o Monday.
-      setTimeout(function () { state.protocol = genProtocol(); state.screen = 'success'; render(); }, 1200);
-    };
+    document.getElementById('submit').onclick = submitTicket;
+  }
+
+  function submitTicket() {
+    const btn = document.getElementById('submit');
+    const serr = document.getElementById('serr');
+    if (serr) serr.textContent = '';
+    btn.disabled = true; btn.textContent = 'Enviando...';
+    state.protocol = state.protocol || genProtocol();
+    fetch(API_BASE + '/api/chamado', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers: state.a, protocol: state.protocol }),
+    })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Resposta inválida do servidor.' }; }); })
+      .then(function (res) {
+        if (res && res.ok) { state.itemId = res.itemId || null; state.screen = 'success'; render(); }
+        else { failSubmit((res && res.error) || 'Não foi possível registrar o chamado.'); }
+      })
+      .catch(function () { failSubmit('Falha de conexão. Verifique a internet e tente novamente.'); });
+  }
+
+  function failSubmit(msg) {
+    const btn = document.getElementById('submit');
+    const serr = document.getElementById('serr');
+    if (serr) serr.textContent = msg;
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Tentar novamente ' + ICONS.arrow; }
+    const card = app.querySelector('.card');
+    if (card) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
   }
 
   function renderSuccess() {
     app.innerHTML =
       '<section class="card success anim-zoom">' +
       '<div class="check">' + ICONS.check + '</div>' +
-      '<h2>Recebemos o seu chamado!</h2>' +
+      '<h2>Chamado registrado!</h2>' +
       '<p class="protocol">Protocolo <strong>' + esc(state.protocol) + '</strong></p>' +
-      '<p class="success-sub">Enviaremos as atualizações para <strong>' + esc(state.a.email || '') + '</strong>. O retorno também pode vir via Teams ou WhatsApp.</p>' +
+      '<p class="success-sub">Seu chamado foi aberto no Monday. Enviaremos as atualizações para <strong>' + esc(state.a.email || '') + '</strong> — o retorno também pode vir via Teams ou WhatsApp.</p>' +
+      '<div class="success-actions">' +
+      '<button class="btn btn-ghost" id="myTickets">Ver meus chamados</button>' +
       '<button class="btn btn-light" id="again">Abrir novo chamado</button>' +
-      '<p class="demo-note">Ambiente de demonstração — a integração de envio com o Monday está em configuração.</p>' +
-      '</section>';
+      '</div></section>';
     document.getElementById('again').onclick = resetAll;
+    document.getElementById('myTickets').onclick = function () {
+      const email = state.a.email || '';
+      state.a = {}; state.idx = 0; state.protocol = ''; state.itemId = null;
+      state.screen = 'history';
+      if (email) loadHistory(email);
+      else { state.historyEmail = ''; render(); }
+    };
+  }
+
+  function loadHistory(email) {
+    state.historyEmail = email;
+    state.historyLoading = true; state.historyError = ''; state.historyData = null;
+    render();
+    fetch(API_BASE + '/api/chamados?email=' + encodeURIComponent(email))
+      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Resposta inválida do servidor.' }; }); })
+      .then(function (res) {
+        state.historyLoading = false;
+        if (res && res.ok) state.historyData = res;
+        else state.historyError = (res && res.error) || 'Não foi possível consultar o histórico.';
+        render();
+      })
+      .catch(function () { state.historyLoading = false; state.historyError = 'Falha de conexão. Tente novamente.'; render(); });
+  }
+
+  function fmtDate(s) {
+    if (!s) return '';
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return String(s);
+    return d.toLocaleDateString('pt-BR');
+  }
+
+  function statusPill(status) {
+    const s = String(status || '').toLowerCase();
+    let cls = 'pill-analise';
+    if (s.indexOf('feito') >= 0 || s.indexOf('conclu') >= 0) cls = 'pill-feito';
+    else if (s.indexOf('progresso') >= 0) cls = 'pill-progresso';
+    else if (s.indexOf('parado') >= 0) cls = 'pill-parado';
+    return '<span class="pill ' + cls + '">' + esc(status || 'Em Análise') + '</span>';
+  }
+
+  function ticketHTML(t) {
+    let replies;
+    if (t.replies && t.replies.length) {
+      replies = '<div class="ticket-replies">' + t.replies.map(function (r) {
+        return '<div class="reply"><div class="reply-head"><span class="reply-author">' + esc(r.author) + '</span>' +
+          '<span class="reply-date">' + fmtDate(r.created_at) + '</span></div>' +
+          '<p>' + esc(r.body) + '</p></div>';
+      }).join('') + '</div>';
+    } else {
+      replies = '<div class="ticket-noreply">Sem respostas ainda.</div>';
+    }
+    return '<div class="ticket">' +
+      '<div class="ticket-head"><span class="ticket-name">' + esc(t.name) + '</span>' + statusPill(t.status) + '</div>' +
+      '<div class="ticket-meta">' + (t.category ? esc(t.category) + ' · ' : '') + 'aberto em ' + fmtDate(t.created_at) + '</div>' +
+      replies + '</div>';
   }
 
   function renderHistory() {
@@ -352,7 +458,7 @@
         '<form id="histform" novalidate>' +
         '<div class="field"><label for="hf">Seu e-mail</label>' +
         '<input id="hf" type="email" autocomplete="email" placeholder="nome@loomy.com.br" value="' + esc(state.historyEmail || '') + '" />' +
-        '<p class="err" id="err"></p></div>' +
+        '<p class="err" id="err" aria-live="polite"></p></div>' +
         '<div class="nav">' +
         '<button type="button" class="btn btn-ghost" id="back">Voltar</button>' +
         '<button type="submit" class="btn btn-primary">Buscar histórico ' + ICONS.arrow + '</button>' +
@@ -367,30 +473,45 @@
           document.getElementById('err').textContent = 'Informe um e-mail válido.';
           return;
         }
-        state.historyEmail = v; render();
+        loadHistory(v);
       };
       setTimeout(function () { inp.focus(); }, 40);
       return;
     }
-    // Etapa 2: resultado — a consulta real ao Monday depende da integração (ver README)
-    app.innerHTML =
-      '<section class="card anim-up">' +
-      '<h2 class="card-title">Meus chamados</h2>' +
-      '<p class="card-sub">Histórico de <span class="hist-email">' + esc(state.historyEmail) + '</span></p>' +
-      '<div class="notice"><span class="notice-ic">' + ICONS.clock + '</span>' +
-      '<span>A consulta em tempo real ao Monday será ativada junto com a integração de envio. ' +
-      'Assim que o back-end estiver conectado, esta tela listará automaticamente, para o e-mail informado:</span></div>' +
-      '<div class="hist-cols">' +
-      '<div class="hist-col"><h3><span class="hcol-ic">' + ICONS.send + '</span> Enviados</h3>' +
-      '<p>Chamados que você abriu, com o status atual (Em análise, Em progresso, Feito, Parado).</p></div>' +
-      '<div class="hist-col"><h3><span class="hcol-ic">' + ICONS.inbox + '</span> Respondidos</h3>' +
-      '<p>Atualizações e respostas da equipe de T.I. registradas em cada chamado.</p></div>' +
-      '</div>' +
-      '<div class="nav">' +
-      '<button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
-      '<button type="button" class="btn btn-light" id="new">Abrir novo chamado ' + ICONS.arrow + '</button>' +
-      '</div></section>';
-    document.getElementById('back').onclick = function () { state.historyEmail = ''; render(); };
+    // Etapa 2: carregando
+    if (state.historyLoading) {
+      app.innerHTML = '<section class="card anim-up"><h2 class="card-title">Meus chamados</h2>' +
+        '<p class="card-sub">Consultando <span class="hist-email">' + esc(state.historyEmail) + '</span>…</p>' +
+        '<div class="loading"><span class="spinner"></span> Buscando no Monday…</div></section>';
+      return;
+    }
+    // Etapa 3: erro
+    if (state.historyError) {
+      app.innerHTML = '<section class="card anim-up"><h2 class="card-title">Meus chamados</h2>' +
+        '<div class="notice"><span class="notice-ic">' + ICONS.clock + '</span><span>' + esc(state.historyError) + '</span></div>' +
+        '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
+        '<button type="button" class="btn btn-primary" id="retry">Tentar novamente ' + ICONS.arrow + '</button></div></section>';
+      document.getElementById('back').onclick = function () { state.historyEmail = ''; state.historyError = ''; render(); };
+      document.getElementById('retry').onclick = function () { loadHistory(state.historyEmail); };
+      return;
+    }
+    // Etapa 4: resultado
+    const data = state.historyData || { count: 0, sent: [] };
+    let content;
+    if (!data.count) {
+      content = '<div class="notice"><span class="notice-ic">' + ICONS.inbox + '</span>' +
+        '<span>Nenhum chamado encontrado para <span class="hist-email">' + esc(state.historyEmail) + '</span>. ' +
+        'Confira se usou o mesmo e-mail da abertura.</span></div>';
+    } else {
+      content = '<div class="tickets">' + data.sent.map(ticketHTML).join('') + '</div>';
+    }
+    app.innerHTML = '<section class="card anim-up"><h2 class="card-title">Meus chamados</h2>' +
+      '<p class="card-sub">' + (data.count ? data.count + ' chamado(s) para ' : 'Histórico de ') +
+      '<span class="hist-email">' + esc(state.historyEmail) + '</span></p>' +
+      content +
+      '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
+      '<button type="button" class="btn btn-light" id="new">Abrir novo chamado ' + ICONS.arrow + '</button></div></section>';
+    document.getElementById('back').onclick = function () { state.historyEmail = ''; state.historyData = null; render(); };
     document.getElementById('new').onclick = resetAll;
   }
 
@@ -492,15 +613,31 @@
   }
 
   function resetAll() {
-    state.screen = 'welcome'; state.idx = 0; state.a = {}; state.protocol = ''; state.historyEmail = ''; render();
+    state.screen = 'welcome'; state.idx = 0; state.a = {}; state.protocol = ''; state.itemId = null;
+    state.historyEmail = ''; state.historyLoading = false; state.historyError = ''; state.historyData = null;
+    render();
+  }
+
+  // Evita descartar um chamado em preenchimento por engano
+  function inProgress() {
+    return (state.screen === 'form' || state.screen === 'review') && Object.keys(state.a).length > 0;
+  }
+  function guarded(action) {
+    return function () {
+      if (inProgress() && !window.confirm('Você tem um chamado em preenchimento. Deseja sair e descartar as informações?')) return;
+      action();
+    };
   }
 
   /* ======================================================================
      7) INICIALIZAÇÃO
      ====================================================================== */
   const logo = document.getElementById('logo');
-  if (logo) logo.onclick = resetAll;
+  if (logo) logo.onclick = guarded(resetAll);
   const histBtn = document.getElementById('history-btn');
-  if (histBtn) histBtn.onclick = function () { state.screen = 'history'; state.historyEmail = ''; render(); };
+  if (histBtn) histBtn.onclick = guarded(function () {
+    state.screen = 'history'; state.historyEmail = ''; state.historyLoading = false;
+    state.historyError = ''; state.historyData = null; render();
+  });
   render();
 })();
