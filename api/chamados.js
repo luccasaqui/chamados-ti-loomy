@@ -11,7 +11,7 @@ const ALLOWED = [
   'http://127.0.0.1:5173',
 ];
 
-const COL = { category: 'single_selectma83sy3', email: 'emailn6m8hl1c', status: 'status' };
+const COL = { category: 'single_selectma83sy3', email: 'emailn6m8hl1c', status: 'status', desc: 'text_mkswjt1a' };
 
 function setCors(req, res) {
   const o = req.headers.origin;
@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const q = 'query { boards(ids: ' + BOARD_ID + ') { items_page(limit: 100) { items { id name created_at' +
-      ' column_values(ids: ["' + COL.email + '","' + COL.category + '","' + COL.status + '"]) { id text }' +
+      ' column_values(ids: ["' + COL.email + '","' + COL.category + '","' + COL.status + '","' + COL.desc + '"]) { id text }' +
       ' updates { id text_body created_at creator { name } } } } } }';
     const data = await monday(token, q);
     const page = data && data.boards && data.boards[0] && data.boards[0].items_page;
@@ -58,15 +58,19 @@ module.exports = async function handler(req, res) {
       return norm(c && c.text) === target;
     }).map(function (it) {
       const get = function (id) { const c = it.column_values.find(function (x) { return x.id === id; }); return (c && c.text) || ''; };
+      // Respostas da equipe = updates, exceto o update automático de detalhes (começa com "Protocolo:")
+      const replies = (it.updates || [])
+        .filter(function (u) { return !/^\s*Protocolo:/.test(u.text_body || ''); })
+        .map(function (u) { return { body: u.text_body || '', created_at: u.created_at, author: (u.creator && u.creator.name) || 'Equipe T.I.' }; })
+        .sort(function (a, b) { return String(a.created_at).localeCompare(String(b.created_at)); });
       return {
         id: it.id,
         name: it.name,
         created_at: it.created_at,
         category: get(COL.category),
         status: get(COL.status) || 'Em Análise',
-        replies: (it.updates || []).map(function (u) {
-          return { body: u.text_body || '', created_at: u.created_at, author: (u.creator && u.creator.name) || 'Equipe T.I.' };
-        }),
+        description: get(COL.desc),
+        replies: replies,
       };
     });
     sent.sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); });
