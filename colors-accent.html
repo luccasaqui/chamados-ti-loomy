@@ -1,0 +1,35 @@
+<!-- @dsCard group="Cores" viewport="720x220" name="Acento & texto" subtitle="Verde funcional #a6fe1f (Pantone 375C) + escala de texto" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { padding: 26px; display: flex; gap: 34px; align-items: flex-start; flex-wrap: wrap; }
+  .accent { display: flex; flex-direction: column; gap: 10px; }
+  .accent-box { width: 168px; height: 96px; border-radius: 12px; background: var(--green); display: flex; align-items: flex-end; padding: 12px; }
+  .accent-box span { font-family: var(--mono); font-size: 12px; color: var(--on-green); font-weight: 600; }
+  .accent .press { width: 168px; height: 34px; border-radius: 8px; background: var(--green-press); display: flex; align-items: center; padding: 0 12px; }
+  .accent .press span { font-family: var(--mono); font-size: 11px; color: var(--on-green); font-weight: 600; }
+  .accent .cap { font-family: var(--mono); font-size: 11px; color: var(--muted-2); }
+  .texts { display: flex; flex-direction: column; gap: 12px; }
+  .trow { display: flex; align-items: center; gap: 12px; }
+  .dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); }
+  .trow .lbl { font-size: 15px; font-weight: 600; }
+  .trow .hex { font-family: var(--mono); font-size: 11px; color: var(--muted-2); }
+</style>
+</head>
+<body>
+  <div class="accent">
+    <div class="accent-box"><span>#a6fe1f · Pantone 375C</span></div>
+    <div class="press"><span>#93d500 · pressionado</span></div>
+    <span class="cap">único acento — só em ação/estado</span>
+  </div>
+  <div class="texts">
+    <div class="trow"><span class="dot" style="background:#F3F4F6"></span><span class="lbl" style="color:#F3F4F6">Texto principal</span><span class="hex">#F3F4F6</span></div>
+    <div class="trow"><span class="dot" style="background:#A4ABB2"></span><span class="lbl" style="color:#A4ABB2">Texto secundário</span><span class="hex">#A4ABB2</span></div>
+    <div class="trow"><span class="dot" style="background:#7E858C"></span><span class="lbl" style="color:#7E858C">Texto de apoio</span><span class="hex">#7E858C</span></div>
+    <div class="trow"><span class="dot" style="background:#ff6b6b"></span><span class="lbl" style="color:#ff6b6b">Erro / atenção</span><span class="hex">#ff6b6b</span></div>
+  </div>
+</body>
+</html>

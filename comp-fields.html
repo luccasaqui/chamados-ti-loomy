@@ -1,0 +1,26 @@
+<!-- @dsCard group="Componentes" viewport="720x300" name="Campos" subtitle="Borda 1px; foco só muda a cor da borda (sem anel)" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .full { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+  <div>
+    <label class="field-label">Padrão</label>
+    <input class="input" type="text" placeholder="Nome completo" />
+  </div>
+  <div>
+    <label class="field-label">Em foco</label>
+    <input class="input is-focus" type="email" value="lucas@loomy.com.br" />
+  </div>
+  <div class="full">
+    <label class="field-label">Área de texto</label>
+    <textarea class="input" placeholder="Escreva aqui…">Explique detalhadamente o processo para melhor abordagem da automação.</textarea>
+  </div>
+</body>
+</html>

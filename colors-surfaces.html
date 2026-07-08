@@ -1,0 +1,45 @@
+<!-- @dsCard group="Cores" viewport="720x180" name="Superfícies" subtitle="Fundo e cartões chapados — sem blur, sem sombra" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { padding: 26px; }
+  .swatches { display: flex; gap: 18px; flex-wrap: wrap; }
+  .sw { display: flex; flex-direction: column; gap: 8px; }
+  .chip-color { width: 132px; height: 66px; border-radius: 12px; border: 1px solid var(--border-strong); }
+  .sw .name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .sw .hex { font-family: var(--mono); font-size: 11px; color: var(--muted-2); }
+</style>
+</head>
+<body>
+  <div class="swatches">
+    <div class="sw">
+      <div class="chip-color" style="background:#121212"></div>
+      <span class="name">Fundo</span>
+      <span class="hex">#121212</span>
+    </div>
+    <div class="sw">
+      <div class="chip-color" style="background:#1A1B1E"></div>
+      <span class="name">Superfície / card</span>
+      <span class="hex">#1A1B1E</span>
+    </div>
+    <div class="sw">
+      <div class="chip-color" style="background:#212226"></div>
+      <span class="name">Elevada / hover</span>
+      <span class="hex">#212226</span>
+    </div>
+    <div class="sw">
+      <div class="chip-color" style="background:#2A2C30"></div>
+      <span class="name">Elevada 2</span>
+      <span class="hex">#2A2C30</span>
+    </div>
+    <div class="sw">
+      <div class="chip-color" style="background:rgba(255,255,255,0.08)"></div>
+      <span class="name">Borda</span>
+      <span class="hex">rgba(255·255·255·.08)</span>
+    </div>
+  </div>
+</body>
+</html>

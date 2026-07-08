@@ -1,0 +1,43 @@
+<!-- @dsCard group="Telas" viewport="760x430" name="Pergunta" subtitle="Uma pergunta por vez — card chapado, foco discreto" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { min-height: 100vh; }
+  .screen { min-height: 100vh; display: flex; flex-direction: column; padding: 18px 24px 26px; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .hdr-btn { padding: 8px 14px; font-size: 13px; border-radius: 999px; border: 1px solid var(--border); }
+  .stage { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .q { font-size: 22px; font-weight: 600; margin: 0 0 16px; }
+  .hint { font-size: 13px; color: var(--muted-2); margin: 10px 0 0; }
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <header class="hdr">
+      <span class="wordmark">L<b>oo</b>my</span>
+      <button class="btn btn-ghost hdr-btn" type="button">Meus chamados</button>
+    </header>
+    <main class="stage">
+      <div class="card">
+        <div class="progress-min">
+          <div class="progress-top"><span class="p-step">Passo 2 de 5</span><span class="p-phase">Identificação</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+        </div>
+        <p class="q">Qual é o seu e-mail?</p>
+        <input class="input is-focus" type="email" value="lucas@loomy.com.br" />
+        <p class="hint">Usaremos este e-mail para enviar as atualizações do chamado.</p>
+        <div class="nav">
+          <button class="btn btn-ghost" type="button">Voltar</button>
+          <button class="btn btn-secondary" type="button">Próximo
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!-- @dsCard group="Telas" viewport="760x460" name="Sucesso" subtitle="Confirmação sóbria — check, protocolo, dois caminhos" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { min-height: 100vh; }
+  .screen { min-height: 100vh; display: flex; flex-direction: column; padding: 18px 24px 26px; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; }
+  .hdr-btn { padding: 8px 14px; font-size: 13px; border-radius: 999px; border: 1px solid var(--border); }
+  .stage { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .card { text-align: center; max-width: 30rem; }
+  .check { width: 64px; height: 64px; border-radius: 50%; background: rgba(166,254,31,0.12); display: flex; align-items: center; justify-content: center; color: var(--green); margin: 0 auto 18px; }
+  .check svg { width: 32px; height: 32px; }
+  .card h2 { font-size: 24px; font-weight: 700; margin: 0 0 10px; }
+  .protocol { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+  .protocol b { color: var(--green); font-weight: 700; letter-spacing: 0.02em; }
+  .ssub { font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0 auto 22px; }
+  .ssub b { color: var(--text); font-weight: 600; }
+  .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <header class="hdr">
+      <span class="wordmark">L<b>oo</b>my</span>
+      <button class="btn btn-ghost hdr-btn" type="button">Meus chamados</button>
+    </header>
+    <main class="stage">
+      <div class="card">
+        <div class="check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h2>Chamado registrado!</h2>
+        <p class="protocol">Protocolo <b>TI-20260708-4821</b></p>
+        <p class="ssub">Enviaremos as atualizações para <b>lucas@loomy.com.br</b> — o retorno também pode vir via Teams ou WhatsApp.</p>
+        <div class="actions">
+          <button class="btn btn-ghost" type="button">Ver meus chamados</button>
+          <button class="btn btn-secondary" type="button">Abrir novo chamado</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

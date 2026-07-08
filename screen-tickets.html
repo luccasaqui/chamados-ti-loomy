@@ -1,0 +1,76 @@
+<!-- @dsCard group="Telas" viewport="760x620" name="Meus chamados" subtitle="Histórico como conversa — respostas da equipe em balões" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { min-height: 100vh; }
+  .screen { min-height: 100vh; display: flex; flex-direction: column; padding: 18px 24px 26px; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .hdr-btn { padding: 8px 14px; font-size: 13px; border-radius: 999px; border: 1px solid var(--border); background: rgba(166,254,31,0.06); color: var(--green); }
+  .title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+  .sub b { color: var(--green); font-weight: 600; }
+  .tickets { display: flex; flex-direction: column; gap: 12px; }
+  .ticket { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .ticket-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .ticket-name { font-size: 15px; font-weight: 600; }
+  .ticket-meta { font-size: 12px; color: var(--muted-2); margin-top: 3px; }
+  .thread { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+  .noreply { font-size: 13px; color: var(--muted-2); font-style: italic; margin-top: 10px; }
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <header class="hdr">
+      <span class="wordmark">L<b>oo</b>my</span>
+      <button class="btn btn-ghost hdr-btn" type="button">Meus chamados</button>
+    </header>
+    <main>
+      <div class="card">
+        <h2 class="title">Meus chamados</h2>
+        <p class="sub">2 chamados para <b>lucas@loomy.com.br</b></p>
+        <div class="tickets">
+          <div class="ticket">
+            <div class="ticket-head">
+              <div>
+                <div class="ticket-name">Lucas · Acessos</div>
+                <div class="ticket-meta">Acessos / Contas · aberto em 08/07</div>
+              </div>
+              <span class="pill pill-progresso">Em Progresso</span>
+            </div>
+            <div class="thread">
+              <div class="bubble bubble-you">
+                <div class="bubble-head"><span class="bubble-who">Você</span><span class="bubble-date">08/07</span></div>
+                <div class="bubble-body">Sem acesso ao IXC desde a manhã — erro de credencial ao entrar.</div>
+              </div>
+              <div class="bubble bubble-team">
+                <div class="bubble-head"><span class="bubble-who">Equipe T.I.</span><span class="bubble-date">08/07</span></div>
+                <div class="bubble-body">Redefinimos seu acesso e reenviamos a senha por e-mail. Pode testar?</div>
+              </div>
+            </div>
+          </div>
+          <div class="ticket">
+            <div class="ticket-head">
+              <div>
+                <div class="ticket-name">Lucas · Equipamentos</div>
+                <div class="ticket-meta">Equipamentos / Periféricos · aberto em 05/07</div>
+              </div>
+              <span class="pill pill-feito">Concluído</span>
+            </div>
+            <div class="noreply">Sem respostas ainda.</div>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" type="button">Trocar e-mail</button>
+          <button class="btn btn-secondary" type="button">Abrir novo chamado
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

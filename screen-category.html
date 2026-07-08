@@ -1,0 +1,67 @@
+<!-- @dsCard group="Telas" viewport="760x600" name="Categorias" subtitle="Seleção como lista de ajustes — agrupada, sem cards com glow" -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="theme.css" />
+<style>
+  body { min-height: 100vh; }
+  .screen { min-height: 100vh; display: flex; flex-direction: column; padding: 18px 24px 26px; }
+  .hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .hdr-btn { padding: 8px 14px; font-size: 13px; border-radius: 999px; border: 1px solid var(--border); }
+  .q { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .q-sub { font-size: 14px; color: var(--muted); margin: 0 0 18px; }
+  .nav { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .sv { fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <header class="hdr">
+      <span class="wordmark">L<b>oo</b>my</span>
+      <button class="btn btn-ghost hdr-btn" type="button">Meus chamados</button>
+    </header>
+    <main>
+      <div class="card">
+        <div class="progress-min">
+          <div class="progress-top"><span class="p-step">Passo 3 de 5</span><span class="p-phase">Categoria</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+        </div>
+        <p class="q">Como podemos ajudar?</p>
+        <p class="q-sub">Selecione a opção que melhor descreve a sua solicitação.</p>
+        <div class="cat-list">
+          <span class="cat-group">Suporte</span>
+          <div class="cat-row sel">
+            <span class="cat-ic"><svg class="sv" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M11.5 11.5 21 2"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg></span>
+            <span class="cat-body"><span class="cat-title">Acessos / Contas</span><span class="cat-desc">IXC, Monday, Opa Suíte e outros</span></span>
+            <span class="cat-chev"><svg class="sv" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <div class="cat-row">
+            <span class="cat-ic"><svg class="sv" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></span>
+            <span class="cat-body"><span class="cat-title">Equipamentos</span><span class="cat-desc">Configuração e periféricos</span></span>
+            <span class="cat-chev"><svg class="sv" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <span class="cat-group">Apontamentos</span>
+          <div class="cat-row">
+            <span class="cat-ic"><svg class="sv" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+            <span class="cat-body"><span class="cat-title">IA Aplicada</span><span class="cat-desc">Agentes de voz / chat — apontamentos</span></span>
+            <span class="cat-chev"><svg class="sv" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+          <span class="cat-group">Melhorias</span>
+          <div class="cat-row">
+            <span class="cat-ic"><svg class="sv" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+            <span class="cat-body"><span class="cat-title">Automação / Processos</span><span class="cat-desc">Novos fluxos e otimizações</span></span>
+            <span class="cat-chev"><svg class="sv" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></span>
+          </div>
+        </div>
+        <div class="nav">
+          <button class="btn btn-ghost" type="button">Voltar</button>
+          <button class="btn btn-secondary" type="button">Próximo
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
