@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#121212" />
+  <meta name="description" content="Portal de abertura de chamados de T.I. da Loomy — Suporte, Acessos & Contas, Equipamentos, Automação de Processos e IA Aplicada." />
+  <title>Loomy · Chamados T.I.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23121212'/%3E%3Ctext x='50' y='72' font-family='Arial, sans-serif' font-size='64' font-weight='bold' text-anchor='middle' fill='%23a6fe1f'%3EL%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <!-- Fundo interativo (malha de pontos + brilho que segue o cursor) -->
+  <canvas id="mesh" aria-hidden="true"></canvas>
+  <div id="glow" aria-hidden="true"></div>
+
+  <!-- Cabeçalho -->
+  <header class="site-header">
+    <button class="logo" id="logo" type="button" aria-label="Voltar ao início">L<span>oo</span>my</button>
+    <div class="header-tag">Suporte&nbsp;T.I. · Automação · IA</div>
+  </header>
+
+  <!-- Aplicação (renderizada por app.js) -->
+  <main id="app" class="app"></main>
+
+  <!-- Rodapé -->
+  <footer class="site-footer">
+    <span>© <span id="year"></span> Loomy Smart Solutions</span>
+    <span class="sep">•</span>
+    <span>Chamados T.I.</span>
+  </footer>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>

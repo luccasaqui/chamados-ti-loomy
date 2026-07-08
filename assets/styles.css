@@ -1,0 +1,455 @@
+/* ==========================================================================
+   Loomy · Chamados T.I. — estilos
+   Identidade baseada no protótipo: dark UI + verde Loomy + Montserrat
+   ========================================================================== */
+
+:root {
+  --bg: #121212;
+  --card: rgba(26, 27, 30, 0.8);
+  --card-solid: #1a1b1e;
+  --green: #a6fe1f;
+  --green-600: #93d500;
+  --green-glow: rgba(166, 254, 31, 0.25);
+  --text: #ffffff;
+  --muted: #9aa0a6;
+  --muted-2: #6b7075;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.3);
+  --radius: 2rem;
+  --radius-sm: 1rem;
+  --maxw: 48rem;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+}
+
+::selection { background: var(--green); color: #000; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #53565a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green); }
+
+/* -------------------- Fundo interativo -------------------- */
+#mesh {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+  pointer-events: none;
+}
+#glow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: background 0.15s ease;
+}
+
+/* -------------------- Cabeçalho / Rodapé -------------------- */
+.site-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(to bottom, var(--bg) 0%, rgba(18, 18, 18, 0.6) 60%, transparent 100%);
+}
+.logo {
+  font-weight: 800;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+.logo span { color: var(--green); }
+.logo:hover { transform: scale(1.05); }
+.header-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted-2);
+  text-transform: uppercase;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.25rem;
+  font-size: 0.78rem;
+  color: var(--muted-2);
+}
+.site-footer .sep { opacity: 0.5; }
+
+/* -------------------- Área principal -------------------- */
+.app {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 7rem 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* -------------------- Tela inicial (hero) -------------------- */
+.hero { text-align: center; }
+.hero-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: rgba(166, 254, 31, 0.08);
+  border: 1px solid rgba(166, 254, 31, 0.25);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  margin-bottom: 1.75rem;
+}
+.hero h1 {
+  font-size: clamp(2.4rem, 6vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.25rem;
+}
+.hero h1 .g { color: var(--green); }
+.hero-sub {
+  font-size: clamp(1.05rem, 2.5vw, 1.25rem);
+  color: var(--muted);
+  max-width: 40rem;
+  margin: 0 auto 2rem;
+  line-height: 1.5;
+}
+.rules {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 2.25rem;
+  max-width: 34rem;
+  text-align: left;
+  display: grid;
+  gap: 0.6rem;
+}
+.rules li {
+  position: relative;
+  padding-left: 1.6rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+.rules li::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0.45em;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+/* -------------------- Cartão do formulário -------------------- */
+.card {
+  width: 100%;
+  background: var(--card);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+}
+@media (min-width: 640px) { .card { padding: 3rem; } }
+
+/* -------------------- Progresso -------------------- */
+.progress {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 2.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted-2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.progress .on { color: var(--green); }
+.progress .chev { width: 14px; height: 14px; opacity: 0.6; }
+.progress .chev svg { width: 100%; height: 100%; display: block; }
+
+/* -------------------- Campos -------------------- */
+.field { margin-bottom: 0.5rem; }
+.field > label:not(.drop),
+.field .q {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-bottom: 0.9rem;
+}
+.field .q { font-size: 1.4rem; font-weight: 700; }
+.req { color: var(--green); }
+.q-sub, .hint {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: -0.4rem 0 1.1rem;
+  line-height: 1.4;
+}
+.hint { margin: 0.7rem 0 0; }
+
+input, textarea, select {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+input::placeholder, textarea::placeholder { color: var(--muted-2); }
+textarea { resize: vertical; min-height: 8rem; line-height: 1.5; }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--green);
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 4px rgba(166, 254, 31, 0.08);
+}
+select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aa0a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.1rem center;
+  padding-right: 3rem;
+}
+select option { background: var(--card-solid); color: var(--text); }
+
+.err {
+  min-height: 1.2rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ff6b6b;
+}
+
+/* -------------------- Categorias -------------------- */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem;
+}
+@media (min-width: 700px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.cat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 1.4rem 0.9rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.cat:hover {
+  border-color: var(--border-hover);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+.cat.sel {
+  border-color: var(--green);
+  background: rgba(166, 254, 31, 0.1);
+  color: var(--green);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 24px var(--green-glow);
+}
+.cat-ic { display: inline-flex; flex: none; width: 30px; height: 30px; margin-bottom: 0.4rem; }
+.cat-ic svg { width: 100%; height: 100%; display: block; }
+.cat-label { font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
+.cat-desc { font-size: 0.75rem; color: var(--muted-2); line-height: 1.25; }
+.cat.sel .cat-desc { color: rgba(166, 254, 31, 0.7); }
+
+/* -------------------- Chips (seleção única / múltipla) -------------------- */
+.chips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.chip {
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.chip:hover { border-color: var(--border-hover); color: var(--text); }
+.chip.sel {
+  border-color: var(--green);
+  background: rgba(166, 254, 31, 0.12);
+  color: var(--green);
+  box-shadow: 0 0 16px var(--green-glow);
+}
+
+/* -------------------- Upload de arquivos -------------------- */
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 2rem 1rem;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--muted);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.drop:hover, .drop.drag {
+  border-color: var(--green);
+  background: rgba(166, 254, 31, 0.06);
+  color: var(--text);
+}
+.drop-ic { display: inline-flex; flex: none; width: 26px; height: 26px; color: var(--green); margin-bottom: 0.3rem; }
+.drop-ic svg { width: 100%; height: 100%; display: block; }
+.drop-main { font-weight: 700; font-size: 0.98rem; }
+.drop-sub { font-size: 0.82rem; color: var(--muted-2); }
+.files { list-style: none; margin: 0.9rem 0 0; padding: 0; display: grid; gap: 0.4rem; }
+.files li {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.85rem; color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.8rem;
+}
+.files li::before { content: "📎"; }
+
+/* -------------------- Botões -------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn svg { width: 18px; height: 18px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary {
+  background: var(--green);
+  color: #000;
+}
+.btn-primary:not(:disabled):hover {
+  background: var(--green-600);
+  box-shadow: 0 0 24px var(--green-glow);
+  transform: translateY(-1px);
+}
+.btn-light { background: #fff; color: #000; }
+.btn-light:not(:disabled):hover { background: #e5e7eb; transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-ghost:hover { color: var(--text); }
+.btn-lg { font-size: 1.15rem; padding: 1.1rem 2.4rem; border-radius: 999px; }
+.btn-primary.btn-lg:not(:disabled):hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(166, 254, 31, 0.4); }
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border);
+}
+
+/* -------------------- Revisão -------------------- */
+.review-title { font-size: 1.6rem; font-weight: 800; margin: 0 0 0.4rem; }
+.review-sub { color: var(--muted); margin: 0 0 1.75rem; }
+.review { display: grid; gap: 0.85rem; }
+.review-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.2rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.review-row .k { font-size: 0.78rem; font-weight: 700; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.02em; }
+.review-row .v { font-size: 1rem; color: var(--text); word-break: break-word; line-height: 1.45; }
+
+/* -------------------- Sucesso -------------------- */
+.card.success { text-align: center; }
+.check {
+  width: 5.5rem; height: 5.5rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  background: rgba(166, 254, 31, 0.18);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green);
+}
+.check svg { width: 3rem; height: 3rem; }
+.card.success h2 { font-size: 1.9rem; font-weight: 800; margin: 0 0 0.75rem; }
+.protocol { font-size: 1.05rem; color: var(--muted); margin: 0 0 0.75rem; }
+.protocol strong { color: var(--green); letter-spacing: 0.02em; }
+.success-sub { color: var(--muted); font-size: 1.02rem; line-height: 1.5; margin: 0 auto 1.75rem; max-width: 30rem; }
+.demo-note {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--muted-2);
+  margin: 1.5rem auto 0;
+  max-width: 28rem;
+  line-height: 1.4;
+}
+
+/* -------------------- Animações -------------------- */
+@keyframes up { from { opacity: 0; transform: translateY(1.5rem); } to { opacity: 1; transform: none; } }
+@keyframes zoom { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+.anim-up { animation: up 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.anim-zoom { animation: zoom 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.shake { animation: shake 0.35s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-up, .anim-zoom, .shake { animation: none; }
+  * { transition: none !important; }
+}
