@@ -21,11 +21,11 @@ function setCors(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'content-type');
 }
 
-async function monday(token, query) {
+async function monday(token, query, variables) {
   const r = await fetch(MONDAY_API, {
     method: 'POST',
     headers: { 'Authorization': token, 'Content-Type': 'application/json', 'API-Version': '2024-10' },
-    body: JSON.stringify({ query: query }),
+    body: JSON.stringify({ query: query, variables: variables }),
   });
   const j = await r.json();
   if (j.errors || j.error_code) throw new Error(JSON.stringify(j.errors || j));
@@ -44,12 +44,15 @@ module.exports = async function handler(req, res) {
   if (!email) return res.status(400).json({ ok: false, error: 'E-mail não informado.' });
 
   try {
-    const q = 'query { boards(ids: ' + BOARD_ID + ') { items_page(limit: 100) { items { id name created_at' +
+    // Busca por e-mail em TODO o board (qualquer grupo, status ao vivo) — resiliente
+    // a mudanças de grupo/status e ao crescimento do board.
+    const q = 'query ($board: ID!, $cols: [ItemsPageByColumnValuesQuery!]) {' +
+      ' items_page_by_column_values(board_id: $board, limit: 100, columns: $cols) {' +
+      ' items { id name created_at' +
       ' column_values(ids: ["' + COL.email + '","' + COL.category + '","' + COL.status + '","' + COL.desc + '"]) { id text }' +
-      ' updates { id text_body created_at creator { name } } } } } }';
-    const data = await monday(token, q);
-    const page = data && data.boards && data.boards[0] && data.boards[0].items_page;
-    const items = (page && page.items) || [];
+      ' updates { id text_body created_at creator { name } } } } }';
+    const data = await monday(token, q, { board: String(BOARD_ID), cols: [{ column_id: COL.email, column_values: [email] }] });
+    const items = (data && data.items_page_by_column_values && data.items_page_by_column_values.items) || [];
     const norm = function (s) { return String(s || '').trim().toLowerCase(); };
     const target = norm(email);
 

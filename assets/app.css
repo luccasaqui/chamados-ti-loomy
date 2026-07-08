@@ -20,7 +20,7 @@ button { font-family: inherit; }
 .btn, .chip, .cat-row, .hdr-btn, .wordmark { user-select: none; -webkit-user-select: none; }
 /* iOS: impede zoom automático em foco (fonte < 16px) mantendo o visual */
 @supports (-webkit-touch-callout: none) {
-  .input, select, input, textarea { font-size: 16px; }
+  .input, select, input, textarea, .input-group .ig-input { font-size: 16px; }
 }
 
 /* feedback tátil discreto */
@@ -83,6 +83,17 @@ button { font-family: inherit; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 10px; }
 .chip { min-height: 44px; }
+
+/* campo de e-mail com domínio fixo (@loomy.com.br) */
+.input-group {
+  display: flex; align-items: center; width: 100%; min-height: 48px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-field);
+  padding: 0 14px; transition: border-color 0.15s ease;
+}
+.input-group:focus-within { border-color: var(--green); }
+.ig-input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text); font-family: inherit; font-size: 15px; padding: 12px 0; }
+.ig-input::placeholder { color: var(--muted-2); }
+.ig-suffix { flex: none; padding-left: 2px; color: var(--muted-2); font-size: 15px; font-weight: 500; white-space: nowrap; user-select: none; -webkit-user-select: none; }
 
 .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
 .nav .btn { min-height: 44px; }

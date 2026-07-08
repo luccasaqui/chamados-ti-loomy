@@ -45,6 +45,7 @@ const LABELS = {
   equip_desc: 'Problema / solicitação',
   ia_tipo: 'Tipo de IA',
   ia_contato: 'Contato do cliente',
+  ia_cliente_email: 'E-mail do cliente',
   ia_protocolo: 'Protocolo do atendimento',
   ia_apontamento: 'Apontamento',
   duvida_desc: 'Observação / sugestão',

@@ -64,7 +64,8 @@
       ];
       case 'ia': return [
         { key: 'ia_tipo', type: 'select', label: 'Tipo de agente de I.A.', required: true, options: ['I.A. de voz (ligação | chamadas)', 'I.A. de chat (WhatsApp)', "I.A. de E-mail's"] },
-        { key: 'ia_contato', type: 'tel', label: 'Contato do cliente atendido pela IA:', required: false, placeholder: '(00) 00000-0000' },
+        { key: 'ia_contato', type: 'tel', label: 'Contato do cliente atendido pela IA:', required: false, placeholder: '(00) 00000-0000', showIf: function (a) { return a.ia_tipo === 'I.A. de voz (ligação | chamadas)' || a.ia_tipo === 'I.A. de chat (WhatsApp)'; } },
+        { key: 'ia_cliente_email', type: 'email', label: 'E-mail do cliente atendido pela IA:', required: false, placeholder: 'cliente@exemplo.com', showIf: function (a) { return a.ia_tipo === "I.A. de E-mail's"; } },
         { key: 'ia_protocolo', type: 'text', label: 'Você tem o protocolo desse atendimento?', hint: 'Com o protocolo, conseguimos uma melhor abordagem para a solução 😃', required: false },
         { key: 'ia_apontamento', type: 'textarea', label: 'Descreva detalhadamente o seu apontamento.', required: true },
         { key: 'ia_files', type: 'file', label: 'Evidências do atendimento: gravações | prints.', required: true }
@@ -84,7 +85,7 @@
   function buildSteps(a) {
     var base = [
       { key: 'nome', type: 'text', label: 'Qual é o seu nome?', required: true, placeholder: 'Nome completo', phase: 'Identificação' },
-      { key: 'email', type: 'email', label: 'Qual é o seu e-mail?', required: true, placeholder: 'nome@loomy.com.br', hint: 'Usaremos este e-mail para enviar as atualizações do chamado.', phase: 'Identificação' },
+      { key: 'email', type: 'email-loomy', label: 'Qual é o seu e-mail Loomy?', required: true, placeholder: 'nome.sobrenome', hint: 'Portal exclusivo para colaboradores — digite apenas o que vem antes do @loomy.com.br.', phase: 'Identificação' },
       { key: 'categoria', type: 'category', label: 'Como podemos ajudar?', required: true, phase: 'Categoria' }
     ];
     var extra = stepsFor(a.categoria).map(function (s) { var c = {}; for (var k in s) c[k] = s[k]; c.phase = 'Detalhes'; return c; });
@@ -103,11 +104,14 @@
   function esc(s) {
     return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+  var LOOMY_DOMAIN = '@loomy.com.br';
+  function loomyUser(email) { return String(email || '').replace(/@loomy\.com\.br$/i, ''); }
   function clearCategoryAnswers() { Object.keys(state.a).forEach(function (k) { if (BASE_KEYS.indexOf(k) < 0) delete state.a[k]; }); }
   function validate(step) {
     var v = state.a[step.key];
     if (step.required && isEmpty(v)) return 'Este campo é obrigatório.';
     if (step.type === 'email' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Informe um e-mail válido.';
+    if (step.type === 'email-loomy' && v && !/^[a-z0-9._%+\-]+@loomy\.com\.br$/i.test(v)) return 'Use apenas o texto antes do @ (ex.: nome.sobrenome).';
     return null;
   }
   function genProtocol() {
@@ -143,6 +147,11 @@
     var errP = '<p class="err" id="err" aria-live="polite"></p>';
     var val = state.a[step.key];
 
+    if (step.type === 'email-loomy') {
+      return '<label class="q" for="f">' + esc(step.label) + req + '</label>' +
+        '<div class="input-group"><input class="ig-input" id="f" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="username" placeholder="' + esc(step.placeholder || 'nome.sobrenome') + '" value="' + esc(loomyUser(val)) + '" /><span class="ig-suffix">' + LOOMY_DOMAIN + '</span></div>' +
+        hint + errP;
+    }
     if (step.type === 'text' || step.type === 'email' || step.type === 'tel') {
       var t = step.type === 'email' ? 'email' : (step.type === 'tel' ? 'tel' : 'text');
       var im = t === 'email' ? 'email' : (t === 'tel' ? 'tel' : 'text');
@@ -315,20 +324,24 @@
     if (!state.historyEmail) {
       app.innerHTML = '<div class="view anim"><div class="card">' +
         '<h2 class="title">Meus chamados</h2>' +
-        '<p class="sub">Consulte o histórico dos chamados que você abriu e as respostas da equipe de T.I., usando o e-mail informado na abertura.</p>' +
-        '<form id="histform" novalidate><label class="field-label" for="hf">Seu e-mail</label>' +
-        '<input class="input" id="hf" type="email" inputmode="email" autocomplete="email" placeholder="nome@loomy.com.br" value="' + esc(state.historyEmail || '') + '" />' +
+        '<p class="sub">Consulte o histórico dos seus chamados e as respostas da equipe de T.I. usando o seu e-mail Loomy.</p>' +
+        '<form id="histform" novalidate><label class="field-label" for="hf">Seu e-mail Loomy</label>' +
+        '<div class="input-group"><input class="ig-input" id="hf" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="username" placeholder="nome.sobrenome" value="' + esc(loomyUser(state.historyEmail)) + '" /><span class="ig-suffix">' + LOOMY_DOMAIN + '</span></div>' +
         '<p class="err" id="err" aria-live="polite"></p>' +
         '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Voltar</button>' +
         '<button type="submit" class="btn btn-primary" id="buscar">Buscar histórico ' + ICONS.arrow + '</button></div></form></div></div>';
       var inp = document.getElementById('hf');
       document.getElementById('back').onclick = resetAll;
-      inp.addEventListener('input', function () { var e = document.getElementById('err'); if (e) e.textContent = ''; });
+      inp.addEventListener('input', function () {
+        var cleaned = inp.value.replace(/@.*$/, '');
+        if (cleaned !== inp.value) inp.value = cleaned;
+        var e = document.getElementById('err'); if (e) e.textContent = '';
+      });
       document.getElementById('histform').onsubmit = function (e) {
         e.preventDefault();
-        var v = inp.value.trim();
-        if (!v || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { document.getElementById('err').textContent = 'Informe um e-mail válido.'; return; }
-        loadHistory(v);
+        var u = inp.value.trim().toLowerCase().replace(/@.*$/, '');
+        if (!u || !/^[a-z0-9._%+\-]+$/i.test(u)) { document.getElementById('err').textContent = 'Digite o texto antes do @ (ex.: nome.sobrenome).'; return; }
+        loadHistory(u + LOOMY_DOMAIN);
       };
       setTimeout(function () { inp.focus(); }, 40);
       return;
@@ -403,6 +416,18 @@
     if (next) next.onclick = function () { goNext(steps); };
     if (back) back.onclick = function () { state.idx = Math.max(0, state.idx - 1); render(); };
 
+    if (step.type === 'email-loomy') {
+      var le = document.getElementById('f');
+      le.addEventListener('input', function () {
+        var cleaned = le.value.replace(/@.*$/, '');           // impede colar domínio
+        if (cleaned !== le.value) le.value = cleaned;
+        var u = cleaned.trim().toLowerCase();
+        state.a[step.key] = u ? (u + LOOMY_DOMAIN) : '';
+        clearErr();
+      });
+      le.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); goNext(steps); } });
+      setTimeout(function () { le.focus(); }, 40);
+    }
     if (step.type === 'text' || step.type === 'email' || step.type === 'tel' || step.type === 'textarea') {
       var inp = document.getElementById('f');
       inp.addEventListener('input', function () { state.a[step.key] = inp.value; clearErr(); });
