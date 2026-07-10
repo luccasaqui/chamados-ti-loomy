@@ -1,7 +1,7 @@
 /* ==========================================================================
    Loomy · Portal de Chamados de T.I. — app (design minimalista, PWA/mobile)
-   Sem canvas. Fluxo passo-a-passo com a lógica condicional do WorkForms.
-   Back-end: funções serverless na Vercel (/api).
+   Somente ABERTURA de chamados. Fluxo passo-a-passo com a lógica do WorkForms.
+   Back-end: função serverless na Vercel (/api/chamado).
    ========================================================================== */
 (function () {
   'use strict';
@@ -18,8 +18,6 @@
     chevron: ic('<polyline points="9 18 15 12 9 6"/>'),
     check: ic('<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'),
     clip: ic('<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>'),
-    clock: ic('<circle cx="12" cy="12" r="10"/><polyline points="12 7 12 12 15 14"/>'),
-    inbox: ic('<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>'),
     key: ic('<circle cx="7.5" cy="15.5" r="5.5"/><path d="M11.5 11.5 21 2"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>'),
     cpu: ic('<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>'),
     bot: ic('<rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 8V4"/><circle cx="12" cy="3" r="1.4"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/>'),
@@ -94,10 +92,7 @@
 
   /* -------------------- Estado + utilidades -------------------- */
   var app = document.getElementById('app');
-  var state = {
-    screen: 'welcome', idx: 0, a: {}, protocol: '', itemId: null,
-    historyEmail: '', historyLoading: false, historyError: '', historyData: null
-  };
+  var state = { screen: 'welcome', idx: 0, a: {}, protocol: '', itemId: null };
 
   function activeSteps() { return buildSteps(state.a); }
   function isEmpty(v) { return v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0); }
@@ -117,12 +112,6 @@
   function genProtocol() {
     var d = new Date(); var p = function (n) { return String(n).padStart(2, '0'); };
     return 'TI-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + Math.floor(1000 + Math.random() * 9000);
-  }
-  function fmtDate(s) {
-    if (!s) return '';
-    var d = new Date(s);
-    if (isNaN(d.getTime())) return String(s);
-    return d.toLocaleDateString('pt-BR');
   }
 
   /* -------------------- Progresso (barra fina) -------------------- */
@@ -267,125 +256,13 @@
       '<p class="protocol">Protocolo <b>' + esc(state.protocol) + '</b></p>' +
       '<p class="ssub">Seu chamado foi aberto no Monday. Enviaremos as atualizações para <b>' + esc(state.a.email || '') + '</b> — o retorno também pode vir via Teams ou WhatsApp.</p>' +
       '<div class="actions">' +
-      '<button class="btn btn-ghost" id="myTickets">Ver meus chamados</button>' +
       '<button class="btn btn-secondary" id="again">Abrir novo chamado</button>' +
       '</div></div></div>';
     document.getElementById('again').onclick = resetAll;
-    document.getElementById('myTickets').onclick = function () {
-      var email = state.a.email || '';
-      state.a = {}; state.idx = 0; state.protocol = ''; state.itemId = null;
-      state.screen = 'history';
-      if (email) loadHistory(email); else { state.historyEmail = ''; render(); }
-    };
-  }
-
-  function statusPill(status) {
-    var s = String(status || '').toLowerCase(), cls = 'pill-analise';
-    if (s.indexOf('feito') >= 0 || s.indexOf('conclu') >= 0) cls = 'pill-feito';
-    else if (s.indexOf('progresso') >= 0) cls = 'pill-progresso';
-    else if (s.indexOf('parado') >= 0) cls = 'pill-parado';
-    return '<span class="pill ' + cls + '">' + esc(status || 'Em Análise') + '</span>';
-  }
-
-  function ticketHTML(t) {
-    var thread = [];
-    if (t.description) thread.push({ cls: 'bubble-you', who: 'Você', body: t.description, date: t.created_at });
-    (t.replies || []).forEach(function (r) { thread.push({ cls: 'bubble-team', who: r.author || 'Equipe T.I.', body: r.body, date: r.created_at }); });
-
-    var body;
-    if (thread.length) {
-      body = '<div class="thread">' + thread.map(function (b) {
-        return '<div class="bubble ' + b.cls + '"><div class="bubble-head"><span class="bubble-who">' + esc(b.who) + '</span><span class="bubble-date">' + fmtDate(b.date) + '</span></div><div class="bubble-body">' + esc(b.body) + '</div></div>';
-      }).join('') + '</div>';
-      if (!(t.replies && t.replies.length)) body += '<div class="noreply">Sem respostas da equipe ainda.</div>';
-    } else {
-      body = '<div class="noreply">Sem respostas ainda.</div>';
-    }
-    return '<div class="ticket">' +
-      '<div class="ticket-head"><div><div class="ticket-name">' + esc(t.name) + '</div>' +
-      '<div class="ticket-meta">' + (t.category ? esc(t.category) + ' · ' : '') + 'aberto em ' + fmtDate(t.created_at) + '</div></div>' +
-      statusPill(t.status) + '</div>' + body + '</div>';
-  }
-
-  function loadHistory(email) {
-    state.historyEmail = email; state.historyLoading = true; state.historyError = ''; state.historyData = null;
-    render();
-    fetch(API_BASE + '/api/chamados?email=' + encodeURIComponent(email))
-      .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Resposta inválida do servidor.' }; }); })
-      .then(function (res) {
-        state.historyLoading = false;
-        if (res && res.ok) state.historyData = res; else state.historyError = (res && res.error) || 'Não foi possível consultar o histórico.';
-        render();
-      })
-      .catch(function () { state.historyLoading = false; state.historyError = 'Falha de conexão. Tente novamente.'; render(); });
-  }
-
-  function renderHistory() {
-    if (!state.historyEmail) {
-      app.innerHTML = '<div class="view anim"><div class="card">' +
-        '<h2 class="title">Meus chamados</h2>' +
-        '<p class="sub">Consulte o histórico dos seus chamados e as respostas da equipe de T.I. usando o seu e-mail Loomy.</p>' +
-        '<form id="histform" novalidate><label class="field-label" for="hf">Seu e-mail Loomy</label>' +
-        '<div class="input-group"><input class="ig-input" id="hf" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="username" placeholder="nome.sobrenome" value="' + esc(loomyUser(state.historyEmail)) + '" /><span class="ig-suffix">' + LOOMY_DOMAIN + '</span></div>' +
-        '<p class="err" id="err" aria-live="polite"></p>' +
-        '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Voltar</button>' +
-        '<button type="submit" class="btn btn-primary" id="buscar">Buscar histórico ' + ICONS.arrow + '</button></div></form></div></div>';
-      var inp = document.getElementById('hf');
-      document.getElementById('back').onclick = resetAll;
-      inp.addEventListener('input', function () {
-        var cleaned = inp.value.replace(/@.*$/, '');
-        if (cleaned !== inp.value) inp.value = cleaned;
-        var e = document.getElementById('err'); if (e) e.textContent = '';
-      });
-      document.getElementById('histform').onsubmit = function (e) {
-        e.preventDefault();
-        var u = inp.value.trim().toLowerCase().replace(/@.*$/, '');
-        if (!u || !/^[a-z0-9._%+\-]+$/i.test(u)) { document.getElementById('err').textContent = 'Digite o texto antes do @ (ex.: nome.sobrenome).'; return; }
-        loadHistory(u + LOOMY_DOMAIN);
-      };
-      setTimeout(function () { inp.focus(); }, 40);
-      return;
-    }
-    if (state.historyLoading) {
-      app.innerHTML = '<div class="view anim"><div class="card"><h2 class="title">Meus chamados</h2>' +
-        '<p class="sub">Consultando <span class="hist-email">' + esc(state.historyEmail) + '</span>…</p>' +
-        '<div class="loading"><span class="spinner"></span> Buscando no Monday…</div></div></div>';
-      return;
-    }
-    if (state.historyError) {
-      app.innerHTML = '<div class="view anim"><div class="card"><h2 class="title">Meus chamados</h2>' +
-        '<div class="notice"><span class="notice-ic">' + ICONS.clock + '</span><span>' + esc(state.historyError) + '</span></div>' +
-        '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
-        '<button type="button" class="btn btn-primary" id="retry">Tentar novamente ' + ICONS.arrow + '</button></div></div></div>';
-      document.getElementById('back').onclick = function () { state.historyEmail = ''; state.historyError = ''; render(); };
-      document.getElementById('retry').onclick = function () { loadHistory(state.historyEmail); };
-      return;
-    }
-    var data = state.historyData || { count: 0, sent: [] };
-    var content;
-    if (!data.count) {
-      content = '<div class="notice"><span class="notice-ic">' + ICONS.inbox + '</span><span>Nenhum chamado encontrado para <span class="hist-email">' + esc(state.historyEmail) + '</span>. Confira se usou o mesmo e-mail da abertura.</span></div>';
-    } else {
-      content = '<div class="tickets">' + data.sent.map(ticketHTML).join('') + '</div>';
-    }
-    app.innerHTML = '<div class="view anim"><div class="card"><h2 class="title">Meus chamados</h2>' +
-      '<p class="sub">' + (data.count ? data.count + ' chamado(s) para ' : 'Histórico de ') + '<span class="hist-email">' + esc(state.historyEmail) + '</span></p>' +
-      content +
-      '<div class="nav"><button type="button" class="btn btn-ghost" id="back">Trocar e-mail</button>' +
-      '<button type="button" class="btn btn-secondary" id="new">Abrir novo chamado ' + ICONS.arrow + '</button></div></div></div>';
-    document.getElementById('back').onclick = function () { state.historyEmail = ''; state.historyData = null; render(); };
-    document.getElementById('new').onclick = resetAll;
-  }
-
-  function setHeaderActive() {
-    var h = document.getElementById('history-btn');
-    if (h) { if (state.screen === 'history') h.classList.add('on'); else h.classList.remove('on'); }
   }
 
   function render() {
-    setHeaderActive();
     if (state.screen === 'welcome') return renderWelcome();
-    if (state.screen === 'history') return renderHistory();
     if (state.screen === 'success') return renderSuccess();
     if (state.screen === 'review') return renderReview();
     return renderForm();
@@ -491,7 +368,6 @@
 
   function resetAll() {
     state.screen = 'welcome'; state.idx = 0; state.a = {}; state.protocol = ''; state.itemId = null;
-    state.historyEmail = ''; state.historyLoading = false; state.historyError = ''; state.historyData = null;
     render();
   }
   function inProgress() { return (state.screen === 'form' || state.screen === 'review') && Object.keys(state.a).length > 0; }
@@ -505,9 +381,5 @@
   /* -------------------- Init -------------------- */
   var logo = document.getElementById('logo');
   if (logo) logo.onclick = guarded(resetAll);
-  var histBtn = document.getElementById('history-btn');
-  if (histBtn) histBtn.onclick = guarded(function () {
-    state.screen = 'history'; state.historyEmail = ''; state.historyLoading = false; state.historyError = ''; state.historyData = null; render();
-  });
   render();
 })();

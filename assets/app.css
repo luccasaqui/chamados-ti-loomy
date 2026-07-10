@@ -14,10 +14,10 @@ body {
 }
 button { font-family: inherit; }
 /* alvos de toque sem atraso de 300ms e sem zoom por duplo-toque */
-.btn, .chip, .cat-row, .hdr-btn, .wordmark, .drop, select, input, textarea {
+.btn, .chip, .cat-row, .wordmark, .drop, select, input, textarea {
   touch-action: manipulation;
 }
-.btn, .chip, .cat-row, .hdr-btn, .wordmark { user-select: none; -webkit-user-select: none; }
+.btn, .chip, .cat-row, .wordmark { user-select: none; -webkit-user-select: none; }
 /* iOS: impede zoom automático em foco (fonte < 16px) mantendo o visual */
 @supports (-webkit-touch-callout: none) {
   .input, select, input, textarea, .input-group .ig-input { font-size: 16px; }
@@ -55,14 +55,12 @@ button { font-family: inherit; }
   flex: none;
 }
 .wordmark { background: none; border: none; cursor: pointer; padding: 4px 2px; }
-.hdr-btn { padding: 8px 14px; font-size: 13px; border-radius: 999px; border: 1px solid var(--border); min-height: 40px; }
-.hdr-btn.on { background: rgba(166, 254, 31, 0.06); color: var(--green); border-color: rgba(166, 254, 31, 0.28); }
 
 .app { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 
-/* centralizado (boas-vindas, sucesso, carregando) */
+/* centralizado (boas-vindas, sucesso) */
 .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; }
-/* topo (formulário, categorias, histórico) */
+/* topo (formulário, categorias) */
 .view { width: 100%; }
 
 .card { width: 100%; }
@@ -143,31 +141,6 @@ button { font-family: inherit; }
 .ssub b { color: var(--text); font-weight: 600; }
 .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* -------------------- Histórico -------------------- */
-.title { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
-.sub { font-size: 14px; color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
-.sub b, .hist-email { color: var(--green); font-weight: 600; word-break: break-word; }
-
-.tickets { display: flex; flex-direction: column; gap: 12px; }
-.ticket { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-.ticket-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.ticket-name { font-size: 15px; font-weight: 600; }
-.ticket-meta { font-size: 12px; color: var(--muted-2); margin-top: 3px; }
-.thread { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-.noreply { font-size: 13px; color: var(--muted-2); font-style: italic; margin-top: 10px; }
-
-.notice {
-  display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px;
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-field);
-  color: var(--muted); font-size: 14px; line-height: 1.5;
-}
-.notice-ic { flex: none; width: 20px; height: 20px; color: var(--green); margin-top: 1px; }
-.notice-ic svg { width: 100%; height: 100%; display: block; }
-
-.loading { display: flex; align-items: center; gap: 10px; padding: 26px 0; color: var(--muted); font-size: 14px; }
-.spinner { width: 20px; height: 20px; border: 2px solid var(--surface-3); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
 /* -------------------- Animações de entrada -------------------- */
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .anim { animation: fade-up 0.28s ease; }
@@ -175,7 +148,6 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .anim { animation: none; }
   * { transition: none !important; }
-  .spinner { animation-duration: 1.4s; }
 }
 
 /* -------------------- Ajustes p/ telas muito baixas / teclado aberto -------------------- */
