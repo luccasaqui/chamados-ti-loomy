@@ -6,8 +6,12 @@
 (function () {
   'use strict';
 
-  // Mesmo domínio na Vercel; URL absoluta quando aberto pelo Pages/local.
-  var API_BASE = /(^|\.)vercel\.app$/.test(location.hostname) ? '' : 'https://chamados-ti-loomy.vercel.app';
+  // API no MESMO domínio quando servido pela Vercel (inclui o domínio custom
+  // chamados.ti.loomy.srv.br) -> chamada same-origin, sem CORS. Só usa URL
+  // absoluta quando o site NÃO é servido pela Vercel (localhost, GitHub Pages, file://).
+  var _h = location.hostname;
+  var _elsewhere = _h === 'localhost' || _h === '127.0.0.1' || /\.github\.io$/.test(_h) || location.protocol === 'file:';
+  var API_BASE = _elsewhere ? 'https://chamados-ti-loomy.vercel.app' : '';
 
   /* -------------------- Ícones (traço 1.75, viewBox 24) -------------------- */
   function ic(inner) {

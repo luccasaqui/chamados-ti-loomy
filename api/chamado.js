@@ -8,6 +8,7 @@ const GROUP_ID = 'topics';
 const ALLOWED = [
   'https://luccasaqui.github.io',
   'https://chamados-ti-loomy.vercel.app',
+  'https://chamados.ti.loomy.srv.br',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
@@ -135,29 +136,43 @@ module.exports = async function handler(req, res) {
   const cat = CATEGORY[a.categoria];
   const nome = String(a.nome || '').slice(0, 80) || 'Sem nome';
   const itemName = nome + ' · ' + (cat ? cat.short : 'Chamado');
-  const mutation = 'mutation ($board: ID!, $group: String!, $name: String!, $cols: JSON!) {' +
+
+  // Mutations: com e sem grupo (o grupo pode ter sido renomeado/removido no board)
+  const M_GROUP = 'mutation ($board: ID!, $group: String!, $name: String!, $cols: JSON!) {' +
     ' create_item(board_id: $board, group_id: $group, item_name: $name, column_values: $cols, create_labels_if_missing: false) { id } }';
+  const M_NOGROUP = 'mutation ($board: ID!, $name: String!, $cols: JSON!) {' +
+    ' create_item(board_id: $board, item_name: $name, column_values: $cols, create_labels_if_missing: false) { id } }';
 
-  try {
-    let itemId;
-    try {
-      const cv = buildColumnValues(a);
-      const data = await monday(token, mutation, { board: String(BOARD_ID), group: GROUP_ID, name: itemName, cols: JSON.stringify(cv) });
-      itemId = data.create_item.id;
-    } catch (e1) {
-      // Fallback mínimo: garante que o chamado é criado mesmo se algum column_value falhar
-      const cvMin = a.email ? { [COL.email]: { email: a.email, text: a.email } } : {};
-      const data = await monday(token, mutation, { board: String(BOARD_ID), group: GROUP_ID, name: itemName, cols: JSON.stringify(cvMin) });
-      itemId = data.create_item.id;
-    }
-    // Registra todos os detalhes como um update do item (best-effort)
-    try {
-      await monday(token, 'mutation ($item: ID!, $body: String!) { create_update(item_id: $item, body: $body) { id } }',
-        { item: String(itemId), body: buildDetails(a, protocol) });
-    } catch (_) { /* update é opcional */ }
-
-    return res.status(200).json({ ok: true, itemId: itemId });
-  } catch (e) {
-    return res.status(502).json({ ok: false, error: 'Falha ao registrar no Monday.', detail: String((e && e.message) || e) });
+  async function tryCreate(cols, useGroup) {
+    const vars = { board: String(BOARD_ID), name: itemName, cols: JSON.stringify(cols || {}) };
+    if (useGroup) vars.group = GROUP_ID;
+    const data = await monday(token, useGroup ? M_GROUP : M_NOGROUP, vars);
+    return data.create_item.id;
   }
+
+  // Fallbacks progressivos: se mexerem no board (colunas/labels/grupo), o chamado
+  // ainda é criado. Os detalhes completos vão sempre num update (não depende de colunas).
+  const emailOnly = a.email ? { [COL.email]: { email: a.email, text: a.email } } : {};
+  const attempts = [
+    function () { return tryCreate(buildColumnValues(a), true); }, // ideal: grupo + todas as colunas
+    function () { return tryCreate(emailOnly, true); },            // grupo + só e-mail
+    function () { return tryCreate({}, true); },                   // grupo + sem colunas
+    function () { return tryCreate({}, false); }                   // sem grupo + sem colunas
+  ];
+
+  let itemId = null, lastErr = null;
+  for (let i = 0; i < attempts.length; i++) {
+    try { itemId = await attempts[i](); break; } catch (e) { lastErr = e; }
+  }
+  if (!itemId) {
+    return res.status(502).json({ ok: false, error: 'Falha ao registrar no Monday.', detail: String((lastErr && lastErr.message) || lastErr) });
+  }
+
+  // Detalhes completos como update (best-effort; independe de colunas)
+  try {
+    await monday(token, 'mutation ($item: ID!, $body: String!) { create_update(item_id: $item, body: $body) { id } }',
+      { item: String(itemId), body: buildDetails(a, protocol) });
+  } catch (_) { /* update é opcional */ }
+
+  return res.status(200).json({ ok: true, itemId: itemId });
 };
