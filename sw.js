@@ -1,7 +1,7 @@
 /* Service worker — Loomy Chamados T.I.
    App shell em cache; API nunca é cacheada; funciona em domínio raiz (Vercel)
    e em subpasta (GitHub Pages) via URLs relativas ao próprio SW. */
-const CACHE = 'chamados-ti-v3';
+const CACHE = 'chamados-ti-v4';
 const ASSETS = [
   './',
   './index.html',

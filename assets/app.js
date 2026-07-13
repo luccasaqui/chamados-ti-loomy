@@ -45,6 +45,20 @@
     { label: 'Melhorias', ids: ['automacao'] }
   ];
 
+  /* -------------------- Opções dos selects "folha" (dinâmicas do Monday) --------------------
+     Lidas ao vivo de /api/opcoes; adicionar/excluir no quadro reflete no portal.
+     Enquanto não carregam (ou se a API falhar), usa estes padrões. */
+  var DEFAULT_OPTS = {
+    sistema: ['IXC', 'Opa Suíte', 'Monday', 'Make Integromat', 'Lovable', 'Claude', 'Office', 'Teams', 'VPN', 'Ferramentas NOC', 'Outro...'],
+    equipamentos: ['Celular', 'Notebook', 'Chip SIM', 'Mouse', 'Impressora', 'Outro...'],
+    ia_tipo: ['I.A. de voz (ligação | chamadas)', 'I.A. de chat (WhatsApp)', "I.A. de E-mail's"]
+  };
+  var DYN = { sistema: null, equipamentos: null, ia_tipo: null };
+  function opts(key) { return (DYN[key] && DYN[key].length) ? DYN[key] : DEFAULT_OPTS[key]; }
+  // Detecção robusta (sobrevive a renome/novos labels no Monday)
+  function isOutro(v) { return /outro/i.test(String(v == null ? '' : v)); }
+  function isMail(v) { return /mail/i.test(String(v == null ? '' : v)); }
+
   /* -------------------- Perguntas condicionais (lógica do WorkForms) -------------------- */
   function stepsFor(cat) {
     switch (cat) {
@@ -53,21 +67,21 @@
         { key: 'proc_files', type: 'file', label: 'Anexe prints e detalhes do processo / fluxo.', hint: 'Um print por etapa, ou diagramas/fluxogramas do Miro 😃', required: true }
       ];
       case 'acessos': return [
-        { key: 'sistema', type: 'select', label: 'Qual sistema?', required: false, options: ['IXC', 'Opa Suíte', 'Monday', 'Make Integromat', 'Lovable', 'Claude', 'Office', 'Teams', 'VPN', 'Ferramentas NOC', 'Outro...'] },
-        { key: 'sistema_outro', type: 'text', label: 'Descreva "Outro":', required: true, showIf: function (a) { return a.sistema === 'Outro...'; } },
+        { key: 'sistema', type: 'select', label: 'Qual sistema?', required: false, options: opts('sistema') },
+        { key: 'sistema_outro', type: 'text', label: 'Descreva "Outro":', required: true, showIf: function (a) { return isOutro(a.sistema); } },
         { key: 'acessos_desc', type: 'text', label: 'Descreva o problema | solicitação:', required: true },
         { key: 'acessos_files', type: 'file', label: 'Anexe fotos | prints do sistema com o problema relatado.', required: true }
       ];
       case 'equipamentos': return [
-        { key: 'equip_itens', type: 'multiselect', label: 'Quais equipamentos?', required: true, options: ['Celular', 'Notebook', 'Chip SIM', 'Mouse', 'Impressora', 'Outro...'] },
-        { key: 'equip_outro', type: 'text', label: 'Descreva "Outro":', required: true, showIf: function (a) { return Array.isArray(a.equip_itens) && a.equip_itens.indexOf('Outro...') >= 0; } },
+        { key: 'equip_itens', type: 'multiselect', label: 'Quais equipamentos?', required: true, options: opts('equipamentos') },
+        { key: 'equip_outro', type: 'text', label: 'Descreva "Outro":', required: true, showIf: function (a) { return Array.isArray(a.equip_itens) && a.equip_itens.some(isOutro); } },
         { key: 'equip_desc', type: 'text', label: 'Descreva o problema | solicitação:', required: true },
         { key: 'equip_files', type: 'file', label: 'Anexe fotos | prints da etiqueta do equipamento com o problema relatado.', required: true }
       ];
       case 'ia': return [
-        { key: 'ia_tipo', type: 'select', label: 'Tipo de agente de I.A.', required: true, options: ['I.A. de voz (ligação | chamadas)', 'I.A. de chat (WhatsApp)', "I.A. de E-mail's"] },
-        { key: 'ia_contato', type: 'tel', label: 'Contato do cliente atendido pela IA:', required: false, placeholder: '(00) 00000-0000', showIf: function (a) { return a.ia_tipo === 'I.A. de voz (ligação | chamadas)' || a.ia_tipo === 'I.A. de chat (WhatsApp)'; } },
-        { key: 'ia_cliente_email', type: 'email', label: 'E-mail do cliente atendido pela IA:', required: false, placeholder: 'cliente@exemplo.com', showIf: function (a) { return a.ia_tipo === "I.A. de E-mail's"; } },
+        { key: 'ia_tipo', type: 'select', label: 'Tipo de agente de I.A.', required: true, options: opts('ia_tipo') },
+        { key: 'ia_contato', type: 'tel', label: 'Contato do cliente atendido pela IA:', required: false, placeholder: '(00) 00000-0000', showIf: function (a) { return a.ia_tipo && !isMail(a.ia_tipo); } },
+        { key: 'ia_cliente_email', type: 'email', label: 'E-mail do cliente atendido pela IA:', required: false, placeholder: 'cliente@exemplo.com', showIf: function (a) { return isMail(a.ia_tipo); } },
         { key: 'ia_protocolo', type: 'text', label: 'Você tem o protocolo desse atendimento?', hint: 'Com o protocolo, conseguimos uma melhor abordagem para a solução 😃', required: false },
         { key: 'ia_apontamento', type: 'textarea', label: 'Descreva detalhadamente o seu apontamento.', required: true },
         { key: 'ia_files', type: 'file', label: 'Evidências do atendimento: gravações | prints.', required: true }
@@ -383,7 +397,26 @@
   }
 
   /* -------------------- Init -------------------- */
+  // Lê as opções ao vivo do Monday (adicionar/excluir no quadro reflete aqui).
+  function loadOpcoes() {
+    fetch(API_BASE + '/api/opcoes')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        if (Array.isArray(d.sistema) && d.sistema.length) DYN.sistema = d.sistema;
+        if (Array.isArray(d.equipamentos) && d.equipamentos.length) DYN.equipamentos = d.equipamentos;
+        if (Array.isArray(d.ia_tipo) && d.ia_tipo.length) DYN.ia_tipo = d.ia_tipo;
+        // Se já estiver numa etapa que usa essas opções, re-renderiza com a lista nova
+        if (state.screen === 'form') {
+          var s = activeSteps()[state.idx];
+          if (s && (s.key === 'sistema' || s.key === 'equip_itens' || s.key === 'ia_tipo')) render();
+        }
+      })
+      .catch(function () { /* mantém os padrões */ });
+  }
+
   var logo = document.getElementById('logo');
   if (logo) logo.onclick = guarded(resetAll);
+  loadOpcoes();
   render();
 })();

@@ -33,9 +33,6 @@ const CATEGORY = {
   outro:        { index: 6, short: 'Outro',        label: 'Outro' },
 };
 
-const SISTEMA_INDEX = { 'IXC': 0, 'Opa Suíte': 1, 'Monday': 2, 'Make Integromat': 3, 'Lovable': 4, 'Claude': 6, 'Office': 7, 'Teams': 8, 'VPN': 9, 'Ferramentas NOC': 10, 'Outro...': 11 };
-const IA_TIPO_INDEX = { 'I.A. de voz (ligação | chamadas)': 0, 'I.A. de chat (WhatsApp)': 1, "I.A. de E-mail's": 2 };
-
 const LABELS = {
   proc_desc: 'Processo / fluxo',
   sistema: 'Sistema',
@@ -103,14 +100,17 @@ function buildColumnValues(a) {
   if (a.email) cv[COL.email] = { email: a.email, text: a.email };
   const d = mainDescription(a);
   if (d) cv[COL.desc] = String(d).slice(0, 500);
-  if (a.categoria === 'acessos' && a.sistema != null && SISTEMA_INDEX[a.sistema] !== undefined) {
-    cv[COL.sistema] = { index: SISTEMA_INDEX[a.sistema] };
+  // sistema, equipamentos e tipo de IA: mapeados por TEXTO (as opções são lidas
+  // ao vivo do Monday em /api/opcoes). create_labels_if_missing:false evita criar
+  // label-lixo; se um label sumir entre carregar e enviar, o fallback assume.
+  if (a.categoria === 'acessos' && a.sistema) {
+    cv[COL.sistema] = { label: String(a.sistema) };
   }
   if (a.categoria === 'equipamentos' && Array.isArray(a.equip_itens) && a.equip_itens.length) {
     cv[COL.equip] = { labels: a.equip_itens };
   }
   if (a.categoria === 'ia') {
-    if (a.ia_tipo != null && IA_TIPO_INDEX[a.ia_tipo] !== undefined) cv[COL.iaTipo] = { index: IA_TIPO_INDEX[a.ia_tipo] };
+    if (a.ia_tipo) cv[COL.iaTipo] = { label: String(a.ia_tipo) };
     if (a.ia_contato) cv[COL.phone] = { phone: String(a.ia_contato).replace(/\D/g, ''), countryShortName: 'BR' };
   }
   return cv;
